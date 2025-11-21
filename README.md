@@ -59,7 +59,8 @@ Execute Python, JavaScript, or TypeScript in a secure AWS-managed sandbox:
 ```typescript
 // Core client (framework-agnostic)
 import { CodeInterpreterClient } from 'bedrock-agentcore/code-interpreter'
-// Methods: startSession, stopSession, executeCode, writeFiles, readFiles, listFiles, deleteFiles, executeCommand
+// Methods: startSession, stopSession, executeCode, writeFiles, readFiles, 
+// listFiles, deleteFiles, executeCommand
 ```
 
 ### 🌐 Browser
@@ -68,7 +69,8 @@ Automate web browsing with cloud-based Playwright:
 ```typescript
 // Playwright client (framework-agnostic)
 import { PlaywrightBrowser } from 'bedrock-agentcore/browser/playwright'
-// Methods: startSession, stopSession, navigate, click, fill, type, getText, getHtml, screenshot, evaluate, waitForSelector, back, forward
+// Methods: startSession, stopSession, navigate, click, fill, type, getText, 
+// getHtml, screenshot, evaluate, waitForSelector, back, forward
 ```
 
 ## AgentCore Tools with Vercel AI SDK
