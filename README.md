@@ -51,36 +51,35 @@ Amazon Bedrock AgentCore enables you to deploy and operate highly effective agen
 - 📊 **Observability** - OpenTelemetry tracing: **[Observability Quick Start](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/observability-get-started.html)**
 - 🔐 **Identity** - AWS & third-party auth: **[Identity Quick Start](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/identity-getting-started-cognito.html)**
 
-## AgentCore Tools Quick Example
+## AgentCore Tools
+
+### 💻 Code Interpreter
+Execute Python, JavaScript, or TypeScript in a secure AWS-managed sandbox:
 
 ```typescript
-import { bedrock } from '@ai-sdk/amazon-bedrock'
-import { ToolLoopAgent } from 'ai'
-import { CodeInterpreterTools } from 'bedrock-agentcore/code-interpreter/vercel-ai'
-
-const codeInterpreter = new CodeInterpreterTools()
-
-const agent = new ToolLoopAgent({
-  model: bedrock('global.anthropic.claude-sonnet-4-20250514-v1:0'),
-  tools: codeInterpreter.tools,
-})
-
-const result = await agent.run({
-  prompt: 'Calculate the first 100 fibonacci numbers and plot them',
-})
-
-console.log(result.text)
+// Core client (framework-agnostic)
+import { CodeInterpreterClient } from 'bedrock-agentcore/code-interpreter'
+// Methods: startSession, stopSession, executeCode, writeFiles, readFiles, listFiles, deleteFiles, executeCommand
 ```
 
-**Output:** The agent writes Python code, executes it in a secure AWS sandbox, generates a visualization, and returns the analysis.
+### 🌐 Browser
+Automate web browsing with cloud-based Playwright:
 
-## Installation
+```typescript
+// Playwright client (framework-agnostic)
+import { PlaywrightBrowser } from 'bedrock-agentcore/browser/playwright'
+// Methods: startSession, stopSession, navigate, click, fill, type, getText, getHtml, screenshot, evaluate, waitForSelector, back, forward
+```
+
+## AgentCore Tools with Vercel AI SDK
+
+### Installation
 
 ```bash
 # Install the SDK
 npm install bedrock-agentcore
 
-# Install AI SDK v6 (required)
+# Install AI SDK v6 (required), use any model provider
 npm install ai@beta @ai-sdk/amazon-bedrock@beta
 
 # Install Playwright (optional, only for Browser tools)
@@ -89,30 +88,18 @@ npm install playwright
 
 **Prerequisites:**
 - Node.js >= 20.0.0
-- AWS credentials with Bedrock AgentCore access
-- AWS Bedrock model access enabled
+- [AWS credentials](https://docs.aws.amazon.com//cli/latest/userguide/getting-started-install.html) with Bedrock AgentCore access
+- Access to any large language model like models available in AWS Bedrock
 
-## Available Tools
 
-### 💻 Code Interpreter
-Execute Python, JavaScript, or TypeScript in a secure AWS-managed sandbox:
+### Integration
 
 ```typescript
+import { bedrock } from '@ai-sdk/amazon-bedrock'
+import { ToolLoopAgent } from 'ai'
 import { CodeInterpreterTools } from 'bedrock-agentcore/code-interpreter/vercel-ai'
-// Provides: executeCode, fileOperations, executeCommand
-```
-
-### 🌐 Browser
-Automate web browsing with cloud-based Playwright:
-
-```typescript
 import { BrowserTools } from 'bedrock-agentcore/browser/vercel-ai'
-// Provides: navigate, click, type, getText, getHtml, screenshot, evaluate
-```
 
-### Combine Both Tools
-
-```typescript
 const codeInterpreter = new CodeInterpreterTools()
 const browser = new BrowserTools()
 
@@ -124,55 +111,34 @@ const agent = new ToolLoopAgent({
   },
 })
 
-// Now your agent can browse the web AND execute code
+// Invoke the agent with any prompt
 const result = await agent.run({
   prompt: 'Visit news.ycombinator.com, scrape the top 5 stories, and analyze sentiment',
 })
+
+console.log(result.text)
 ```
 
-## Deployment
+> **Note:** If deploying to Vercel, use [Vercel OIDC](https://vercel.com/docs/oidc/aws) for secure AWS credentials. 
 
-### Vercel Deployment with OIDC
+## Try Examples
 
-When deploying to Vercel, use their OIDC provider for secure AWS credentials:
-
+Run the standalone example:
 ```bash
-npm install @vercel/oidc-aws-credentials-provider
+npx tsx examples/agent-with-code-interpreter.ts
 ```
 
-```typescript
-import { awsCredentialsProvider } from '@vercel/oidc-aws-credentials-provider'
-import { CodeInterpreterTools } from 'bedrock-agentcore/code-interpreter/vercel-ai'
-
-const codeInterpreter = new CodeInterpreterTools({
-  region: process.env.AWS_REGION!,
-  credentialsProvider: awsCredentialsProvider({
-    roleArn: process.env.AWS_ROLE_ARN!,
-  }),
-})
-
-// Use in your Next.js API route
-export async function POST(req: Request) {
-  const agent = new ToolLoopAgent({
-    model: bedrock('global.anthropic.claude-sonnet-4-20250514-v1:0'),
-    tools: codeInterpreter.tools,
-  })
-
-  const result = await agent.run({ prompt: await req.text() })
-  return Response.json({ result: result.text })
-}
+Or try the Next.js app with streaming UI:
+```bash
+cd examples/deep-research-ui && npm install && npm run dev
 ```
 
-**Setup:**
-1. Configure AWS IAM role with Bedrock AgentCore permissions
-2. Add Vercel as trusted identity provider in AWS
-3. Set `AWS_ROLE_ARN` in Vercel environment variables
+## 🏗️ Deployment
 
-See [Vercel OIDC documentation](https://vercel.com/docs/security/secure-backend-access/oidc) for complete setup.
+See [AWS setup guide](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/getting-started-custom.html) for getting started with agentcore.
 
-## Try It
+**Production:** [AWS CDK](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_bedrockagentcore-readme.html).
 
-See [examples/](examples/) for complete working examples including a Next.js app with streaming UI.
 
 ## 📝 License & Contributing
 
