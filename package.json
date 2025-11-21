@@ -1,0 +1,114 @@
+{
+  "name": "bedrock-agentcore",
+  "version": "0.1.0",
+  "description": "TypeScript SDK for AWS Bedrock AgentCore",
+  "main": "dist/src/index.js",
+  "module": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/src/index.js",
+      "types": "./dist/src/index.d.ts"
+    },
+    "./browser": {
+      "import": "./dist/src/tools/browser/index.js",
+      "types": "./dist/src/tools/browser/index.d.ts"
+    },
+    "./browser/playwright": {
+      "import": "./dist/src/tools/browser/integrations/playwright/index.js",
+      "types": "./dist/src/tools/browser/integrations/playwright/index.d.ts"
+    },
+    "./browser/vercel-ai": {
+      "import": "./dist/src/tools/browser/integrations/vercel-ai/index.js",
+      "types": "./dist/src/tools/browser/integrations/vercel-ai/index.d.ts"
+    },
+    "./code-interpreter": {
+      "import": "./dist/src/tools/code-interpreter/index.js",
+      "types": "./dist/src/tools/code-interpreter/index.d.ts"
+    },
+    "./code-interpreter/vercel-ai": {
+      "import": "./dist/src/tools/code-interpreter/integrations/vercel-ai/index.js",
+      "types": "./dist/src/tools/code-interpreter/integrations/vercel-ai/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "check": "npm run lint && npm run format && npm run type-check && npm run test:coverage",
+    "clean": "rm -rf node_modules dist package-lock.json",
+    "test": "vitest run --project unit-node",
+    "test:watch": "vitest --project unit-node",
+    "test:coverage": "vitest run --coverage --project unit-node",
+    "test:types": "vitest run --project types",
+    "test:integ": "vitest run --project integ",
+    "lint": "eslint src examples",
+    "lint:fix": "eslint src examples --fix",
+    "format": "prettier --write src examples",
+    "format:check": "prettier --check src examples",
+    "type-check": "tsc --noEmit",
+    "type-check:watch": "tsc --noEmit --watch",
+    "prepare": "npm run build && husky || true"
+  },
+  "keywords": [
+    "aws",
+    "bedrock",
+    "agentcore",
+    "agents",
+    "ai",
+    "typescript",
+    "sdk"
+  ],
+  "author": "Amazon Web Services",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@ai-sdk/amazon-bedrock": "^4.0.0-beta.58",
+    "@types/node": "^24.6.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "@vitest/coverage-v8": "^4.0.8",
+    "ai": "^6.0.0-beta.99",
+    "eslint": "^9.0.0",
+    "eslint-plugin-tsdoc": "^0.5.0",
+    "husky": "^9.1.7",
+    "playwright": "^1.56.1",
+    "prettier": "^3.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^4.0.8"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aws/bedrock-agentcore-sdk-typescript.git"
+  },
+  "bugs": {
+    "url": "https://github.com/aws/bedrock-agentcore-sdk-typescript/issues"
+  },
+  "homepage": "https://github.com/aws/bedrock-agentcore-sdk-typescript#readme",
+  "dependencies": {
+    "@aws-crypto/sha256-js": "^5.2.0",
+    "@aws-sdk/client-bedrock-agent-runtime": "^3.911.0",
+    "@aws-sdk/client-bedrock-agentcore": "^3.931.0",
+    "@aws-sdk/credential-providers": "^3.931.0",
+    "@smithy/protocol-http": "^5.3.5",
+    "@smithy/signature-v4": "^5.3.5",
+    "@smithy/util-utf8": "^4.2.0",
+    "zod": "^4.1.12"
+  },
+  "peerDependencies": {
+    "ai": ">=6.0.0-beta",
+    "playwright": ">=1.56.0"
+  },
+  "peerDependenciesMeta": {
+    "ai": {
+      "optional": true
+    },
+    "playwright": {
+      "optional": true
+    }
+  }
+}

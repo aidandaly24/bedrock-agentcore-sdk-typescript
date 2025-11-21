@@ -1,0 +1,84 @@
+name: PR Validation
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+jobs:
+  validate:
+    name: Validate PR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate PR title (Conventional Commits)
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            perf
+            test
+            build
+            ci
+            chore
+            revert
+          requireScope: false
+          subjectPattern: ^(?![A-Z]).+$
+          subjectPatternError: |
+            The subject found in the pull request title didn't match the configured pattern.
+            Please ensure that the subject doesn't start with an uppercase character.
+
+      - name: Check for merge conflicts
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          git fetch origin "${BASE_REF}"
+          if git merge-tree $(git merge-base HEAD "origin/${BASE_REF}") HEAD "origin/${BASE_REF}" | grep -q '<<<<<<<'; then
+            echo "Merge conflicts detected"
+            exit 1
+          else
+            echo "No merge conflicts"
+          fi
+
+      - name: Check PR size
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          CHANGED_FILES=$(git diff --name-only "origin/${BASE_REF}...HEAD" | wc -l)
+          ADDITIONS=$(git diff --shortstat "origin/${BASE_REF}...HEAD" | grep -oE '[0-9]+ insertion' | grep -oE '[0-9]+' || echo 0)
+          DELETIONS=$(git diff --shortstat "origin/${BASE_REF}...HEAD" | grep -oE '[0-9]+ deletion' | grep -oE '[0-9]+' || echo 0)
+          TOTAL_CHANGES=$((ADDITIONS + DELETIONS))
+
+          echo "PR Statistics:"
+          echo "  Files changed: ${CHANGED_FILES}"
+          echo "  Lines added: ${ADDITIONS}"
+          echo "  Lines deleted: ${DELETIONS}"
+          echo "  Total changes: ${TOTAL_CHANGES}"
+
+          if [ "${TOTAL_CHANGES}" -gt 1000 ]; then
+            echo "Large PR detected (>1000 lines). Consider splitting into smaller PRs."
+          fi
+
+  label:
+    name: Auto-label PR
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Label by changed files
+        uses: actions/labeler@v5
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
