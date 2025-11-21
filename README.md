@@ -130,6 +130,46 @@ const result = await agent.run({
 })
 ```
 
+## Deployment
+
+### Vercel Deployment with OIDC
+
+When deploying to Vercel, use their OIDC provider for secure AWS credentials:
+
+```bash
+npm install @vercel/oidc-aws-credentials-provider
+```
+
+```typescript
+import { awsCredentialsProvider } from '@vercel/oidc-aws-credentials-provider'
+import { CodeInterpreterTools } from 'bedrock-agentcore/code-interpreter/vercel-ai'
+
+const codeInterpreter = new CodeInterpreterTools({
+  region: process.env.AWS_REGION!,
+  credentialsProvider: awsCredentialsProvider({
+    roleArn: process.env.AWS_ROLE_ARN!,
+  }),
+})
+
+// Use in your Next.js API route
+export async function POST(req: Request) {
+  const agent = new ToolLoopAgent({
+    model: bedrock('global.anthropic.claude-sonnet-4-20250514-v1:0'),
+    tools: codeInterpreter.tools,
+  })
+
+  const result = await agent.run({ prompt: await req.text() })
+  return Response.json({ result: result.text })
+}
+```
+
+**Setup:**
+1. Configure AWS IAM role with Bedrock AgentCore permissions
+2. Add Vercel as trusted identity provider in AWS
+3. Set `AWS_ROLE_ARN` in Vercel environment variables
+
+See [Vercel OIDC documentation](https://vercel.com/docs/security/secure-backend-access/oidc) for complete setup.
+
 ## Try It
 
 See [examples/](examples/) for complete working examples including a Next.js app with streaming UI.
