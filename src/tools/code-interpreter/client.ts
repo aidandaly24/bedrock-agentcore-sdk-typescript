@@ -180,13 +180,16 @@ export class CodeInterpreter {
 
     const response = await this._client.send(command)
 
+    // Using type extension for fields not in SDK types yet
+    const responseWithExtras = response as typeof response & { lastUpdatedAt?: Date }
+
     return {
       sessionId: response.sessionId!,
       codeInterpreterIdentifier: response.codeInterpreterIdentifier!,
       name: response.name!,
       status: response.status ?? 'UNKNOWN',
       createdAt: response.createdAt!,
-      lastUpdatedAt: (response as any).lastUpdatedAt ?? response.createdAt!,
+      lastUpdatedAt: responseWithExtras.lastUpdatedAt ?? response.createdAt!,
       sessionTimeoutSeconds: response.sessionTimeoutSeconds!,
     }
   }
@@ -224,7 +227,7 @@ export class CodeInterpreter {
 
     const command = new ListCodeInterpreterSessionsCommand({
       codeInterpreterIdentifier: interpreterId,
-      ...(params?.status && { status: params.status as any }),
+      ...(params?.status && { status: params.status as unknown as import('@aws-sdk/client-bedrock-agentcore').CodeInterpreterSessionStatus }),
       ...(params?.maxResults && { maxResults: params.maxResults }),
       ...(params?.nextToken && { nextToken: params.nextToken }),
     })

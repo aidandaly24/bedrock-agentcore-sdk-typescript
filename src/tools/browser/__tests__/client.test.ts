@@ -96,6 +96,20 @@ vi.mock('@aws-sdk/client-bedrock-agentcore', () => {
       })
     }
 
+    // Mock response for UpdateBrowserStreamCommand
+    if (command._commandName === 'UpdateBrowserStreamCommand') {
+      return Promise.resolve({
+        browserIdentifier: command.input.browserIdentifier,
+        sessionId: command.input.sessionId,
+        streams: {
+          automationStream: {
+            streamEndpoint: 'wss://example.com/stream',
+            streamStatus: command.input.streamUpdate.automationStreamUpdate.streamStatus,
+          },
+        },
+      })
+    }
+
     return Promise.resolve({})
   })
 
@@ -124,7 +138,11 @@ vi.mock('@aws-sdk/client-bedrock-agentcore', () => {
       this.input = input
       return this
     }),
-    UpdateBrowserStreamCommand: vi.fn(),
+    UpdateBrowserStreamCommand: vi.fn(function (this: any, input: any) {
+      this._commandName = 'UpdateBrowserStreamCommand'
+      this.input = input
+      return this
+    }),
   }
 })
 
@@ -377,6 +395,49 @@ describe('Browser', () => {
 
       expect(wsConnection.url).toContain(session.sessionId)
       expect(wsConnection.url).toContain(client.identifier)
+    })
+  })
+
+  describe('updateBrowserStream', () => {
+    let streamClient: Browser
+
+    beforeEach(() => {
+      streamClient = new Browser({ region: 'us-east-1' })
+    })
+
+    it('enables automation stream for current session', async () => {
+      await streamClient.startSession()
+      const result = await streamClient.updateBrowserStream({ streamStatus: 'ENABLED' })
+
+      expect(result).toBeDefined()
+      expect(result.streamEndpoint).toBe('wss://example.com/stream')
+      expect(result.streamStatus).toBe('ENABLED')
+    })
+
+    it('disables automation stream for current session', async () => {
+      await streamClient.startSession()
+      const result = await streamClient.updateBrowserStream({ streamStatus: 'DISABLED' })
+
+      expect(result).toBeDefined()
+      expect(result.streamEndpoint).toBe('wss://example.com/stream')
+      expect(result.streamStatus).toBe('DISABLED')
+    })
+
+    it('throws error when no active session', async () => {
+      await expect(
+        streamClient.updateBrowserStream({ streamStatus: 'ENABLED' })
+      ).rejects.toThrow(/Browser ID and Session ID must be provided/)
+    })
+
+    it('updates stream with explicit browser and session IDs', async () => {
+      const result = await streamClient.updateBrowserStream({
+        browserId: 'custom-browser',
+        sessionId: 'custom-session',
+        streamStatus: 'ENABLED'
+      })
+
+      expect(result).toBeDefined()
+      expect(result.streamStatus).toBe('ENABLED')
     })
   })
 })

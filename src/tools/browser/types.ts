@@ -296,6 +296,44 @@ export interface ListSessionsResponse {
 }
 
 /**
+ * Parameters for updating the browser automation stream.
+ */
+export interface UpdateStreamParams {
+  /**
+   * Browser identifier.
+   * Uses current instance identifier if not provided.
+   */
+  browserId?: string
+
+  /**
+   * Session ID.
+   * Uses current active session ID if not provided.
+   */
+  sessionId?: string
+
+  /**
+   * New stream status for the automation stream.
+   * 'ENABLED' to enable the stream, 'DISABLED' to disable it.
+   */
+  streamStatus: 'ENABLED' | 'DISABLED'
+}
+
+/**
+ * Response from updating a browser stream.
+ */
+export interface UpdateStreamResponse {
+  /**
+   * Stream endpoint URL.
+   */
+  streamEndpoint?: string
+
+  /**
+   * Updated stream status.
+   */
+  streamStatus?: string
+}
+
+/**
  * WebSocket connection details for browser automation.
  */
 export interface WebSocketConnection {

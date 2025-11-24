@@ -5,6 +5,7 @@ import {
   StopBrowserSessionCommand,
   GetBrowserSessionCommand,
   ListBrowserSessionsCommand,
+  UpdateBrowserStreamCommand,
 } from '@aws-sdk/client-bedrock-agentcore'
 import { fromNodeProviderChain } from '@aws-sdk/credential-providers'
 import type { AwsCredentialIdentityProvider } from '@aws-sdk/types'
@@ -21,6 +22,9 @@ import type {
   ListSessionsParams,
   ListSessionsResponse,
   SessionSummary,
+  UpdateStreamParams,
+  UpdateStreamResponse,
+  BrowserSessionStreams,
 } from './types.js'
 import { DEFAULT_IDENTIFIER, DEFAULT_SESSION_NAME, DEFAULT_TIMEOUT, DEFAULT_REGION } from './types.js'
 
@@ -177,31 +181,49 @@ export class Browser {
 
     const response = await this._client.send(command)
 
-    // Parse streams if present
+    // Parse streams if present - using type extension for fields not in SDK types yet
+    const responseWithExtras = response as typeof response & {
+      lastUpdatedAt?: Date
+      streams?: {
+        automationStream?: {
+          streamEndpoint?: string
+          streamStatus?: string
+        }
+        liveViewStream?: {
+          streamEndpoint?: string
+        }
+      }
+    }
+
     const responseData: GetSessionResponse = {
       sessionId: response.sessionId!,
       browserIdentifier: response.browserIdentifier!,
       name: response.name!,
       status: response.status ?? 'UNKNOWN',
       createdAt: response.createdAt!,
-      lastUpdatedAt: (response as any).lastUpdatedAt ?? response.createdAt!,
+      lastUpdatedAt: responseWithExtras.lastUpdatedAt ?? response.createdAt!,
       sessionTimeoutSeconds: response.sessionTimeoutSeconds!,
     }
 
     // Add streams if present
-    if ((response as any).streams) {
-      const streams: any = {}
+    if (responseWithExtras.streams) {
+      const streams: BrowserSessionStreams = {}
 
-      if ((response as any).streams.automationStream) {
-        streams.automationStream = {
-          streamEndpoint: (response as any).streams.automationStream.streamEndpoint,
-          streamStatus: (response as any).streams.automationStream.streamStatus,
+      const autoStream = responseWithExtras.streams.automationStream
+      if (autoStream?.streamEndpoint) {
+        const streamInfo: import('./types.js').StreamInfo = {
+          streamEndpoint: autoStream.streamEndpoint,
         }
+        if (autoStream.streamStatus) {
+          streamInfo.streamStatus = autoStream.streamStatus
+        }
+        streams.automationStream = streamInfo
       }
 
-      if ((response as any).streams.liveViewStream) {
+      const liveStream = responseWithExtras.streams.liveViewStream
+      if (liveStream?.streamEndpoint) {
         streams.liveViewStream = {
-          streamEndpoint: (response as any).streams.liveViewStream.streamEndpoint,
+          streamEndpoint: liveStream.streamEndpoint,
         }
       }
 
@@ -244,7 +266,7 @@ export class Browser {
 
     const command = new ListBrowserSessionsCommand({
       browserIdentifier: browserId,
-      ...(params?.status && { status: params.status as any }),
+      ...(params?.status && { status: params.status as unknown as import('@aws-sdk/client-bedrock-agentcore').BrowserSessionStatus }),
       ...(params?.maxResults && { maxResults: params.maxResults }),
       ...(params?.nextToken && { nextToken: params.nextToken }),
     })
@@ -264,6 +286,62 @@ export class Browser {
       items,
       ...(response.nextToken && { nextToken: response.nextToken }),
     }
+  }
+
+  /**
+   * Update the browser automation stream status.
+   *
+   * @param params - Stream update parameters
+   * @returns Updated stream information
+   *
+   * @example
+   * ```typescript
+   * // Enable automation stream
+   * const result = await browser.updateBrowserStream({
+   *   streamStatus: 'ENABLED'
+   * })
+   *
+   * // Disable automation stream
+   * await browser.updateBrowserStream({
+   *   streamStatus: 'DISABLED'
+   * })
+   * ```
+   */
+  async updateBrowserStream(params: UpdateStreamParams): Promise<UpdateStreamResponse> {
+    const browserId = params.browserId ?? this.identifier
+    const sessionId = params.sessionId ?? this._session?.sessionId
+
+    if (!browserId || !sessionId) {
+      throw new Error(
+        'Browser ID and Session ID must be provided or available from current session. ' +
+          'Start a session first or provide explicit IDs.'
+      )
+    }
+
+    const command = new UpdateBrowserStreamCommand({
+      browserIdentifier: browserId,
+      sessionId,
+      streamUpdate: {
+        automationStreamUpdate: {
+          streamStatus: params.streamStatus,
+        },
+      },
+    })
+
+    const response = await this._client.send(command)
+
+    // Extract the updated stream information from the response
+    const automationStream = response.streams?.automationStream
+    const result: UpdateStreamResponse = {}
+
+    if (automationStream?.streamEndpoint) {
+      result.streamEndpoint = automationStream.streamEndpoint
+    }
+    if (automationStream?.streamStatus) {
+      result.streamStatus = automationStream.streamStatus
+    }
+
+    return result
   }
 
   /**
