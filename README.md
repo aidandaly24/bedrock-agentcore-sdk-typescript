@@ -51,6 +51,8 @@ Amazon Bedrock AgentCore enables you to deploy and operate highly effective agen
 - 📊 **Observability** - OpenTelemetry tracing: **[Observability Quick Start](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/observability-get-started.html)**
 - 🔐 **Identity** - AWS & third-party auth: **[Identity Quick Start](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/identity-getting-started-cognito.html)**
 
+> **TypeScript SDK:** This SDK currently provides Code Interpreter and Browser tools. Additional service integrations are on the roadmap.
+
 ## AgentCore Tools
 
 ### 💻 Code Interpreter
@@ -74,6 +76,8 @@ import { PlaywrightBrowser } from 'bedrock-agentcore/browser/playwright'
 ```
 
 ## AgentCore Tools with Vercel AI SDK
+
+Integrate Code Interpreter and Browser capabilities into your AI agents using the Vercel AI SDK.
 
 ### Installation
 
