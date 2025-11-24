@@ -266,7 +266,9 @@ export class Browser {
 
     const command = new ListBrowserSessionsCommand({
       browserIdentifier: browserId,
-      ...(params?.status && { status: params.status as unknown as import('@aws-sdk/client-bedrock-agentcore').BrowserSessionStatus }),
+      ...(params?.status && {
+        status: params.status as unknown as import('@aws-sdk/client-bedrock-agentcore').BrowserSessionStatus,
+      }),
       ...(params?.maxResults && { maxResults: params.maxResults }),
       ...(params?.nextToken && { nextToken: params.nextToken }),
     })

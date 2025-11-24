@@ -86,7 +86,9 @@ vi.mock('@aws-sdk/client-bedrock-agentcore', () => {
         },
       ]
 
-      let filtered = command.input.status ? mockSessions.filter((s: any) => s.status === command.input.status) : mockSessions
+      let filtered = command.input.status
+        ? mockSessions.filter((s: any) => s.status === command.input.status)
+        : mockSessions
       const maxResults = command.input.maxResults || 10
       filtered = filtered.slice(0, maxResults)
 
@@ -424,16 +426,16 @@ describe('Browser', () => {
     })
 
     it('throws error when no active session', async () => {
-      await expect(
-        streamClient.updateBrowserStream({ streamStatus: 'ENABLED' })
-      ).rejects.toThrow(/Browser ID and Session ID must be provided/)
+      await expect(streamClient.updateBrowserStream({ streamStatus: 'ENABLED' })).rejects.toThrow(
+        /Browser ID and Session ID must be provided/
+      )
     })
 
     it('updates stream with explicit browser and session IDs', async () => {
       const result = await streamClient.updateBrowserStream({
         browserId: 'custom-browser',
         sessionId: 'custom-session',
-        streamStatus: 'ENABLED'
+        streamStatus: 'ENABLED',
       })
 
       expect(result).toBeDefined()

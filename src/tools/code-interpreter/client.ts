@@ -227,7 +227,9 @@ export class CodeInterpreter {
 
     const command = new ListCodeInterpreterSessionsCommand({
       codeInterpreterIdentifier: interpreterId,
-      ...(params?.status && { status: params.status as unknown as import('@aws-sdk/client-bedrock-agentcore').CodeInterpreterSessionStatus }),
+      ...(params?.status && {
+        status: params.status as unknown as import('@aws-sdk/client-bedrock-agentcore').CodeInterpreterSessionStatus,
+      }),
       ...(params?.maxResults && { maxResults: params.maxResults }),
       ...(params?.nextToken && { nextToken: params.nextToken }),
     })

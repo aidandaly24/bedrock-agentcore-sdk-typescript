@@ -121,7 +121,9 @@ vi.mock('@aws-sdk/client-bedrock-agentcore', () => {
         },
       ]
 
-      let filtered = command.input.status ? mockSessions.filter((s: any) => s.status === command.input.status) : mockSessions
+      let filtered = command.input.status
+        ? mockSessions.filter((s: any) => s.status === command.input.status)
+        : mockSessions
       const maxResults = command.input.maxResults || 10
       filtered = filtered.slice(0, maxResults)
 
