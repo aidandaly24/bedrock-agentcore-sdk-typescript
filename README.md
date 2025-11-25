@@ -95,7 +95,7 @@ npm install playwright
 
 **Prerequisites:**
 - Node.js >= 20.0.0
-- [AWS credentials](https://docs.aws.amazon.com//cli/latest/userguide/getting-started-install.html) with Bedrock AgentCore access
+- [AWS credentials](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) with Bedrock AgentCore access
 - Access to any large language model like models available in AWS Bedrock
 
 
