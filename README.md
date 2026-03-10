@@ -33,7 +33,13 @@
 - **Managed tools** — Secure code execution and browser automation, ready to use.
 - **Credential management** — Centralized API keys and OAuth tokens, injected at runtime.
 
-Works with [Strands Agents](https://strandsagents.com), [Vercel AI SDK](https://ai-sdk.dev), or any framework.
+### Framework Compatibility
+
+The SDK is designed to work with any agent framework. Here's how:
+
+- **Runtime** — Deploy agents built with any framework. The `BedrockAgentCoreApp` accepts any request handler — plug in [Strands Agents](https://strandsagents.com), [Vercel AI SDK](https://ai-sdk.dev), [LangChain](https://js.langchain.com), or your own custom logic.
+- **Tools** — Code Interpreter and Browser tools include built-in integrations for [Strands Agents](https://strandsagents.com) and [Vercel AI SDK](https://ai-sdk.dev), so tools can be passed directly to those frameworks' agents. For other frameworks, use the core clients (`CodeInterpreter`, `PlaywrightBrowser`) directly and wire them into your own tool definitions.
+- **Identity** — Credential wrappers (`withAccessToken`, `withApiKey`) work with any async function, regardless of framework.
 
 ---
 
