@@ -98,9 +98,39 @@ const agent = new Agent({
 
 ---
 
+## Gateway Interceptors
+
+Run logic at a gateway's REQUEST or RESPONSE point without hand-building the envelope. `createInterceptor` parses the input, stamps the required `interceptorOutputVersion`, and converts any thrown error into a safe response—so a malformed envelope (which the gateway would otherwise silently ignore) can't happen.
+
+```typescript
+import { createInterceptor, InterceptorResponse } from 'bedrock-agentcore/gateway'
+
+export const handler = createInterceptor((event) => {
+  if (event.point === 'REQUEST') {
+    if (!event.request?.headers?.authorization) {
+      return InterceptorResponse.deny(403, { error: 'forbidden' })
+    }
+    return InterceptorResponse.passThrough(event)
+  }
+  return InterceptorResponse.transformResponse(200, event.response?.headers ?? {}, event.response?.body)
+})
+```
+
+Unit-test the handler with the sample-event builders—no deploy required:
+
+```typescript
+import { sampleRequest } from 'bedrock-agentcore/gateway'
+
+const result = await handler(sampleRequest({ headers: { authorization: 'Bearer x' } }).raw)
+expect(result.mcp.transformedGatewayRequest).toBeDefined()
+```
+
+---
+
 ## Features
 
 - **Runtime** — Secure, session-isolated compute → [Examples](https://github.com/awslabs/bedrock-agentcore-samples-typescript/tree/main/primitives/runtime)
+- **Gateway Interceptors** — Typed REQUEST/RESPONSE hooks with envelope handling built in
 - **Code Interpreter** — Execute Python/JS/TS in a sandbox → [Examples](https://github.com/awslabs/bedrock-agentcore-samples-typescript/tree/main/primitives/tools/code-interpreter)
 - **Browser** — Cloud-based web automation → [Examples](https://github.com/awslabs/bedrock-agentcore-samples-typescript/tree/main/primitives/tools/browser)
 - **Identity** — Manage API keys and OAuth tokens → [Examples](https://github.com/awslabs/bedrock-agentcore-samples-typescript/tree/main/primitives/identity)

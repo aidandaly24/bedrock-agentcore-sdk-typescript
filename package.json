@@ -53,6 +53,10 @@
     "./identity": {
       "import": "./dist/src/identity/index.js",
       "types": "./dist/src/identity/index.d.ts"
+    },
+    "./gateway": {
+      "import": "./dist/src/gateway/index.js",
+      "types": "./dist/src/gateway/index.d.ts"
     }
   },
   "scripts": {
